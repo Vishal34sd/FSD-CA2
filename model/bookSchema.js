@@ -22,6 +22,14 @@ const bookSchema = mongoose.Schema({
         enum : ['Fiction' , 'Non-Fiction' , 'Adventure' , 'Science']
        
          }
+         ,
+
+    bookAvailibility : {
+        type : Boolean , 
+        default : true 
+    } 
+
+
 })
 
 const bookModel = mongoose.model('book',bookSchema) ; 

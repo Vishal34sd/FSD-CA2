@@ -44,20 +44,20 @@ router.post("/addBook", async (req, res) => {
 
 router.get("/getBooks", async (req, res) => {
     try {
-        const limit = Number(req.query.limit , 10) || 2;
-        const skip = Number(req.query.skip , 10) || 0;
+        const limit = Number(req.query.limit, 10) || 2;
+        const skip = Number(req.query.skip, 10) || 0;
 
         const books = await Book.find().limit(limit).skip(skip);
 
-        const totalBooks = await Book.countDocuments() ;
-        const totalPages = Math.ceil(totalBooks / limit) ;
-        
+        const totalBooks = await Book.countDocuments();
+        const totalPages = Math.ceil(totalBooks / limit);
+
 
         const pageMetaData = {
-            currentPage : skip / limit + 1 ,
-            totalPages : totalPages ,
-            limit : limit ,
-            totalBooks : totalBooks 
+            currentPage: skip / limit + 1,
+            totalPages: totalPages,
+            limit: limit,
+            totalBooks: totalBooks
         }
 
         if (!books) {
@@ -81,41 +81,32 @@ router.get("/getBooks", async (req, res) => {
     }
 });
 
-router.patch("/updateBook/:id", async (req, res) => {
+router.patch("/updateBook/:bookId", async (req, res) => {
     try {
-        const { title, author, category } = req.body;
-        const bookId = req.params.id ; 
+        const { bookAvailibility } = req.body;
 
-        if (!title || !author || !category) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required"
-            });
-        }
+        const book = await Book.findOneAndUpdate(
+            { bookId: req.params.bookId },
+            { bookAvailibility },
+            { new: true }
+        );
 
-        const getBook = await Book.findOne({ bookId });
-
-        if (!getBook) {
+        if (!book) {
             return res.status(404).json({
                 success: false,
                 message: "Book not found"
             });
         }
 
-        getBook.title = title;
-        getBook.author = author;
-        getBook.category = category;
-
-        await getBook.save();
-
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
-            message: "Book updated successfully",
-            data: getBook
+            message: "Book availability updated successfully",
+            data: book
         });
+
     } catch (err) {
-        console.log("Internal server error:", err);
-        return res.status(500).json({
+        console.log(err);
+        res.status(500).json({
             success: false,
             message: "Internal server error"
         });
